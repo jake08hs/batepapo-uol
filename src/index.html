@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bate-Papo UOL</title>
+    <link rel="icon" href="img/logo.png" type="image/png">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</head>
+
+<body>
+    <div class="fundo-chat">
+    </div>
+    <div class="overlay"></div>
+    <div class="login-container">
+        <h2>Entre na Sala</h2>
+        <img src="img/people 1@2x.png" alt="Ícone de Usuário">
+        <input type="text" class="username-input" placeholder="Digite seu nome">
+        <button class="enter-button">Entrar</button>
+    </div>
+
+    <div class="chat-container" style="display: none;">
+        <div class="chat-wrapper">
+            <header class="chat-header">
+                <img src="img/chatuol.png" alt="Ícone Bate-Papo UOL">
+                <img src="img/people 1.png" alt="Ícone de usuários">
+            </header>
+
+            <main class="chat-messages"></main>
+
+            <footer class="chat-footer">
+                <div class="input-container">
+                    <input type="hidden" class="destinatario" value="Todos">
+                    <input type="text" class="message-input" placeholder="Escreva aqui...">
+                    <p>Enviando para Todos (público)</p>
+                    <button class="send-button">
+                        <ion-icon name="paper-plane-outline"></ion-icon>
+                    </button>
+                </div>
+            </footer>
+        </div>
+        <div class="sidebar-chat">
+            <h3>Escolha um contato para enviar mensagem:</h3>
+            <div class="opcoes-contato">
+                <div class="opcao contato selecionado" data-contato="Todos">
+                    <input type="checkbox" class="checkbox-icone" id="todos" value="">
+                    <ion-icon name="people-outline"></ion-icon> Todos
+                </div>
+                <div id="usuarios-online">
+                </div>
+            </div>
+
+            <h3>Escolha a visibilidade:</h3>
+            <div class="opcoes-visibilidade">
+                <div class="opcao visibilidade" data-visibilidade="publico">
+                    <input type="checkbox" class="checkbox-icone" id="publico" value="">
+                    <ion-icon name="globe-outline"></ion-icon> Público
+                </div>
+                <div class="opcao visibilidade" data-visibilidade="reservado">
+                    <input type="checkbox" class="checkbox-icone" id="reservado" value="">
+                    <ion-icon name="lock-closed-outline"></ion-icon> Reservadamente
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="./script.js"></script>
+</body>
+
+</html>
