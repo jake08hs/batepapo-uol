@@ -6,10 +6,11 @@ body {
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    overflow: hidden;
+    overflow-x: hidden; 
     background-color: #f4abab;
     padding-bottom: 40px;
 }
+
 
 /* Sidebar ajustada */
 /*.sidebar-chat {
@@ -29,13 +30,13 @@ body {
 }
 */
 .sidebar-chat.visivel {
-    display: block;
+    right: 0;
 }
 
 .sidebar-chat {
     position: fixed;
     top: 0;
-    right: -260px; /* Mantém fora da tela inicialmente */
+    right: 0;
     height: 100%;
     width: 260px;
     background: white;
@@ -44,14 +45,26 @@ body {
     transition: right 0.3s ease-in-out;
     z-index: 10;
     overflow-y: auto;
-    display: block; /* Removendo display: none */
+    display: block;
 }
 
 .sidebar-chat h2 {
     font-size: 16px;
     font-weight: 500;
-    margin-bottom: 10px;
+    margin-bottom: 16px; /* espaço embaixo*/
+    margin-top: 24px; /* espaço em cima  */
 }
+
+.sidebar-chat h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px; /* Espaço entre o título e o bloco de opções */
+}
+
+.opcoes-contato {
+    margin-bottom: 24px; /* Espaço entre os contatos e a visibilidade */
+}
+
 
 .opcao {
     display: flex;
@@ -193,6 +206,9 @@ button.enter-button:hover {
     flex-direction: column;
     gap: 8px;
     box-sizing: border-box;
+    font-family:'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 /* Mensagens Reservadas */
