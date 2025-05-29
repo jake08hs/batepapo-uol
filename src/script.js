@@ -1,72 +1,121 @@
+const UUID = "20bf46a1-855a-4a39-aaaf-6eeda1934a1e"; 
+//const API_BASE_URL = `https://mock-api.driven.com.br/api/v6/uol/${UUID}`;
+
+
 const estadoChat = {
     loginVisivel: true,
     chatVisivel: false,
     nomeUsuario: "",
-    identificadorSala: "20bf46a1-855a-4a39-aaaf-6eeda1934a1e", // nova uuid 
     mensagens: [],
-    usuariosOnline: []
+    usuariosOnline: [],
+    destinatario: "Todos",             
+    tipoVisibilidade: "message"        
 };
 
+
 // Entrar na sala
-async function entrarNoChat() {
+function entrarNoChat() {
     const nome = document.querySelector(".username-input").value.trim();
     if (!nome) return alert("Digite seu nome!");
 
-    try {
-        await axios.post(`https://mock-api.driven.com.br/api/v6/uol/participants/${estadoChat.identificadorSala}`, { name: nome });
+    axios.post(
+        'https://mock-api.driven.com.br/api/v6/uol/participants/20bf46a1-855a-4a39-aaaf-6eeda1934a1e',
+        { name: nome }
+    )
+    .then(() => {
         estadoChat.nomeUsuario = nome;
 
-       
         const nomeUsuarioSidebar = document.querySelector(".nome-usuario-sidebar");
         if (nomeUsuarioSidebar) {
             nomeUsuarioSidebar.textContent = nome;
         }
-       
 
         iniciarChat();
-    } catch (err) {
-        alert(err?.response?.status === 400 ? "Nome já em uso!" : "Erro ao entrar.");
+    })
+  .catch(err => {
+    console.error("Erro completo ao tentar entrar:", err); 
+    if (err?.response?.status === 400) {
+        alert("Nome já em uso!");
+    } else {
+        alert("Erro grave ao entrar. Verifique o console."); 
     }
+    if (err.response && err.response.data) {
+        console.error("Dados da resposta do servidor (entrada):", err.response.data); 
+    }
+});
 }
 
 
 function iniciarChat() {
     document.querySelector(".login-container").style.display = "none";
     document.querySelector(".chat-container").style.display = "block";
-    atualizarUsuariosOnline();
-    buscarMensagens();
-    setInterval(manterUsuarioAtivo, 5000);
+
+    atualizarUsuariosOnline(); 
+    buscarMensagens();       
+
+   
+    setInterval(manterUsuarioAtivo, 3000);
+    setInterval(buscarMensagens, 3000);
+    setInterval(atualizarUsuariosOnline, 10000);
+
+    configurarVisibilidade();
+
+  
+    const opcaoInicial = document.querySelector(`.opcao.visibilidade[data-visibilidade="${estadoChat.tipoVisibilidade}"]`);
+    if (opcaoInicial) {
+        document.querySelector(".opcao.visibilidade.selecionado")?.classList.remove("selecionado");
+        opcaoInicial.classList.add("selecionado");
+    }
+ 
+    selecionarContato("Todos"); 
 }
 
 // Presença
-async function manterUsuarioAtivo() {
+function manterUsuarioAtivo() {
     if (!estadoChat.nomeUsuario) return;
-    try {
-        await axios.post(`https://mock-api.driven.com.br/api/v6/uol/status/${estadoChat.identificadorSala}`, { name: estadoChat.nomeUsuario });
-    } catch (err) {
-        console.error("Erro presença:", err);
-    }
+
+    axios.post('https://mock-api.driven.com.br/api/v6/uol/status/' + UUID, {
+        name: estadoChat.nomeUsuario
+    })
+    .then(() => {
+      
+    })
+    .catch(err => {
+        console.error("Erro ao manter status de usuário:", err);
+        if (err.response) {
+            console.error("Status do erro:", err.response.status);
+            console.error("Dados da resposta do erro:", err.response.data);
+        }
+    });
 }
 
 // Mensagens
-async function buscarMensagens() {
-    try {
-        const res = await axios.get(`https://mock-api.driven.com.br/api/v6/uol/messages/${estadoChat.identificadorSala}`);
-        estadoChat.mensagens = res.data;
-        renderizarMensagens();
-    } catch (err) {
-        console.error("Erro ao buscar mensagens:", err);
-    }
+function buscarMensagens() {
+    axios.get('https://mock-api.driven.com.br/api/v6/uol/messages/20bf46a1-855a-4a39-aaaf-6eeda1934a1e')
+        .then(res => {
+            estadoChat.mensagens = res.data;
+            //CONSOLE.LOG 
+            console.log("Mensagens recebidas da API:", res.data);
 
-    estadoChat.mensagens = resposta.data;
-    limparMensagensAntigas(); // chama logo depois
-    renderizarMensagens();
+            // limparMensagensAntigas(); 
+            renderizarMensagens();
+        })
+        .catch(err => {
+            console.error("Erro ao buscar mensagens:", err);
 
+            if (err.response) {
+                console.log("Status do erro:", err.response.status);
+                console.log("Dados do erro:", err.response.data);
+            } else {
+                console.log("Erro sem resposta do servidor:", err.message);
+            }
+        });
 }
+
 // Limpar mensagens 
 function limparMensagensAntigas() {
     const agora = Date.now();
-    const tempoLimite = 5 * 60 * 1000; // 5 minutos para atualizar
+    const tempoLimite = 5 * 60 * 1000; 
 
     estadoChat.mensagens = estadoChat.mensagens.filter(msg => {
         const msgTime = new Date(msg.time).getTime();
@@ -76,7 +125,6 @@ function limparMensagensAntigas() {
 
 function renderizarMensagens() {
     const container = document.querySelector(".chat-messages");
-    const manterScroll = container.scrollHeight - container.clientHeight <= container.scrollTop + 1;
     container.innerHTML = "";
 
     estadoChat.mensagens.forEach(msg => {
@@ -87,44 +135,51 @@ function renderizarMensagens() {
         msgEl.classList.add("mensagem", tipo);
         if (msg.from === estadoChat.nomeUsuario) msgEl.classList.add("minha-mensagem");
 
-        // horário
-        let data;
-        if (!msg.time || msg.time === "Invalid Date") {
+        const [horasStr, minutosStr, segundosStr] = msg.time.split(':');
+        const horaFormatada = `${horasStr}:${minutosStr}`;
 
-            data = new Date();
-        } else if (isNaN(msg.time)) {
-          
-            data = new Date(Date.parse(msg.time));
-        } else {
-           
-            data = new Date(msg.time * 1000);
+        let mensagemConteudoHTML = `<span class="hora">(${horaFormatada})</span> `;
+
+        if (msg.type === "status") {
+            mensagemConteudoHTML += `<strong>${msg.from}</strong> ${msg.text}`;
+        } else if (msg.type === "private_message") {
+            mensagemConteudoHTML += `<strong>${msg.from}</strong> para <strong>${msg.to}</strong>: ${msg.text}`;
+        } else { 
+            mensagemConteudoHTML += `<strong>${msg.from}</strong> para <strong>${msg.to}</strong>: ${msg.text}`;
         }
 
-        if (isNaN(data.getTime())) {
-            data = new Date();
-        }
-
-        const hora = data.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const dia = data.toLocaleDateString();
-
-        msgEl.innerHTML = `<span class="hora">(${hora}) ${dia}</span> <strong>${msg.from}</strong> para <strong>${msg.to}</strong>: ${msg.text}`;
+        msgEl.innerHTML = mensagemConteudoHTML;
         container.appendChild(msgEl);
     });
 
-    container.scrollTop = manterScroll ? container.scrollHeight : container.scrollHeight;
+    container.scrollTop = container.scrollHeight;
 }
 
+function configurarVisibilidade() {
+    const opcoesVisibilidade = document.querySelectorAll(".opcao.visibilidade");
+
+    opcoesVisibilidade.forEach(opcao => {
+        opcao.addEventListener("click", () => {
+         
+            document.querySelector(".opcao.visibilidade.selecionado")?.classList.remove("selecionado");
+
+            opcao.classList.add("selecionado");
+
+            estadoChat.tipoVisibilidade = opcao.dataset.visibilidade;
+
+            atualizarRodape(estadoChat.destinatario);
+        });
+    });
+}
 
 // Enviar mensagem
-async function enviarMensagem() {
+function enviarMensagem() {
     const inputMensagem = document.querySelector(".message-input");
     const textoMensagem = inputMensagem.value.trim();
     if (!textoMensagem) return;
 
-    const destinatarioSelecionado = document.querySelector(".destinatario")?.value || "Todos";
-    const tipoDeMensagem = destinatarioSelecionado === "Todos" 
-        ? "message" 
-        : "private_message";
+    const destinatarioSelecionado = estadoChat.destinatario || "Todos";
+    const tipoDeMensagem = estadoChat.tipoVisibilidade || "message";
 
     const mensagemParaEnviar = {
         from: estadoChat.nomeUsuario,
@@ -133,72 +188,81 @@ async function enviarMensagem() {
         type: tipoDeMensagem
     };
 
-    try {
-        await axios.post(`https://mock-api.driven.com.br/api/v6/uol/messages/${estadoChat.identificadorSala}`, mensagemParaEnviar);
-        inputMensagem.value = ""; 
-        buscarMensagens(); 
-        atualizarRodape(destinatarioSelecionado); 
-    } catch (erro) {
+    axios.post(
+        'https://mock-api.driven.com.br/api/v6/uol/messages/20bf46a1-855a-4a39-aaaf-6eeda1934a1e',
+        mensagemParaEnviar
+    )
+    .then(() => {
+        inputMensagem.value = "";
+        buscarMensagens();
+        atualizarRodape(destinatarioSelecionado);
+    })
+    .catch(erro => {
         console.error("Erro ao enviar a mensagem:", erro);
-    }
+    });
 }
-
 
 // Rodapé
 function atualizarRodape(destinatario) {
     const visibilidadeSelecionada = document.querySelector(".visibilidade.selecionado");
-    const tipoVisibilidade = visibilidadeSelecionada?.getAttribute("data-visibilidade");
+    const tipoVisibilidade = visibilidadeSelecionada?.getAttribute("data-visibilidade") || "message";
 
-    // Verificar se a visibilidade é "reservado" ou "público"
-    const tipoMensagem = tipoVisibilidade === "reservado" ? "(reservadamente)" : "(público)";
+    estadoChat.tipoVisibilidade = tipoVisibilidade;
 
+    const tipoMensagem = tipoVisibilidade === "private_message" ? "(reservadamente)" : "(público)";
     const elementoAviso = document.querySelector(".chat-footer .aviso-mensagem");
+
     if (elementoAviso) {
         elementoAviso.textContent = `Enviando para ${destinatario} ${tipoMensagem}`;
     }
 }
 
-
 // Participantes
-async function atualizarUsuariosOnline() {
-    try {
-        const res = await axios.get(`https://mock-api.driven.com.br/api/v6/uol/participants/${estadoChat.identificadorSala}`);
-        estadoChat.usuariosOnline = res.data;
-        renderizarUsuarios();
-    } catch (err) {
-        console.error("Erro ao buscar usuários:", err);
-    }
+function atualizarUsuariosOnline() {
+    axios.get('https://mock-api.driven.com.br/api/v6/uol/participants/20bf46a1-855a-4a39-aaaf-6eeda1934a1e')
+        .then(res => {
+            estadoChat.usuariosOnline = res.data;
+            renderizarUsuarios();
+        })
+        .catch(err => {
+          
+        });
 }
 
 function renderizarUsuarios() {
     const container = document.getElementById("usuarios-online");
     container.innerHTML = "";
 
-    // Adiciona o próprio usuário logado na lista
     const usuarioLogado = document.createElement("div");
     usuarioLogado.classList.add("opcao", "contato");
     usuarioLogado.dataset.contato = estadoChat.nomeUsuario;
     usuarioLogado.innerHTML = `
         <input type="checkbox" class="checkbox-icone">
-        <ion-icon name="person-outline"></ion-icon> ${estadoChat.nomeUsuario}
+        <ion-icon name="person-outline"></ion-icon>
+        <span class="nome-contato">${estadoChat.nomeUsuario}</span>
     `;
+    usuarioLogado.addEventListener("click", () => {
+        selecionarContato(estadoChat.nomeUsuario);
+    });
     container.appendChild(usuarioLogado);
 
-    // Adiciona os demais usuários online (exceto o próprio)
     estadoChat.usuariosOnline.forEach(u => {
         if (u.name === estadoChat.nomeUsuario) return;
+
         const el = document.createElement("div");
         el.classList.add("opcao", "contato");
         el.dataset.contato = u.name;
         el.innerHTML = `
             <input type="checkbox" class="checkbox-icone">
-            <ion-icon name="person-outline"></ion-icon> ${u.name}
+            <ion-icon name="person-outline"></ion-icon>
+            <span class="nome-contato">${u.name}</span>
         `;
+        el.addEventListener("click", () => {
+            selecionarContato(u.name);
+        });
         container.appendChild(el);
     });
 }
-
-
 
 // Seleção de contato
 function selecionarContato(nome) {
@@ -212,13 +276,10 @@ function selecionarContato(nome) {
 
     if (contatoSelecionado) {
         contatoSelecionado.classList.add("selecionado");
+        estadoChat.destinatario = nome; 
+        atualizarRodape(nome);         
     }
-
-    atualizarRodape(nome); // usa a visibilidade já selecionada
 }
-
-
-
 
 // Seleção de visibilidade
 function selecionarVisibilidade(tipo) {
@@ -240,69 +301,47 @@ function selecionarVisibilidade(tipo) {
         if (checkbox) checkbox.checked = true;
     }
 
-    // Atualiza o rodapé com o contato selecionado atual
     const contatoSelecionado = document.querySelector(".contato.selecionado");
     const destinatario = contatoSelecionado?.getAttribute("data-contato") || "Todos";
     atualizarRodape(destinatario);
 }
 
-
-
 // Sidebar
 function toggleSidebar(abrir) {
-    document.querySelector(".sidebar-chat").style.display = abrir ? "block" : "none";
-    document.querySelector(".overlay").style.display = abrir ? "block" : "none";
-    document.querySelector(".chat-container").classList.toggle("sidebar-aberta", abrir);
+    const sidebar = document.querySelector(".sidebar-chat");
+    const overlay = document.querySelector(".overlay");
+    const chatContainer = document.querySelector(".chat-container");
+
+    if (abrir) {
+        sidebar.classList.add("visivel");
+        overlay.classList.add("visivel");
+        chatContainer.classList.add("sidebar-aberta");
+    } else {
+        sidebar.classList.remove("visivel");
+        overlay.classList.remove("visivel");
+        chatContainer.classList.remove("sidebar-aberta");
+    }
 }
-
-// expõe pro console
-window.toggleSidebar = toggleSidebar;
-
-
-// Eventos
 document.querySelector(".overlay").addEventListener("click", () => toggleSidebar(false));
+
 document.querySelector(".chat-header img:last-of-type").addEventListener("click", () => toggleSidebar(true));
+
+document.querySelectorAll(".sidebar-chat .opcao").forEach(opcao =>
+    opcao.addEventListener("click", () => {
+        setTimeout(() => toggleSidebar(false), 200);
+    })
+);
+
 document.querySelector(".enter-button").addEventListener("click", entrarNoChat);
+
 document.querySelector(".send-button").addEventListener("click", enviarMensagem);
+
 document.querySelector(".message-input").addEventListener("keypress", e => e.key === "Enter" && enviarMensagem());
 
 document.querySelectorAll(".opcao.visibilidade").forEach(opcao =>
     opcao.addEventListener("click", () => selecionarVisibilidade(opcao.dataset.visibilidade))
 );
 
-// Inicialização
 document.addEventListener("DOMContentLoaded", () => {
-  
-    selecionarContato("Todos");
-    document.querySelector(`.visibilidade[data-visibilidade="publico"]`).classList.add("selecionado");
 
-    document.querySelectorAll(".visibilidade").forEach(item => {
-        item.addEventListener("click", () => {
-            const tipo = item.getAttribute("data-visibilidade");
-            selecionarVisibilidade(tipo);
-        });
-    });
-
-   
-    document.querySelectorAll(".contato").forEach(item => {
-        item.addEventListener("click", () => {
-            const nome = item.getAttribute("data-contato");
-            selecionarContato(nome);
-        });
-    });
 });
-
-
-document.addEventListener("click", function (event) {
-    const contato = event.target.closest(".contato");
-    if (contato && contato.dataset.contato) {
-        selecionarContato(contato.dataset.contato);
-        document.querySelectorAll(".contato").forEach(el => el.classList.remove("selecionado"));
-        contato.classList.add("selecionado");
-    }
-});
-
-// Intervalos
-setInterval(manterUsuarioAtivo, 5000);
-setInterval(buscarMensagens, 3000);
-setInterval(atualizarUsuariosOnline, 10000);

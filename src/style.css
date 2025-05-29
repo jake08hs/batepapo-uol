@@ -1,4 +1,4 @@
-/* Ajustes para o body */
+
 body {
     font-family: 'Roboto', sans-serif;
     display: flex;
@@ -7,62 +7,46 @@ body {
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden; 
-    background-color: #f4abab;
+   /* background-color: #f4abab38; */
     padding-bottom: 40px;
 }
 
-
-/* Sidebar ajustada */
-/*.sidebar-chat {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    width: 260px;
-    background: white;
-    padding: 20px 15px;
-    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2);
-    display: none;
-    z-index: 5;
-    overflow-y: auto;
-    font-family: 'Roboto', sans-serif;
-    border-radius: 0px 10px 10px 0px;
-}
-*/
 .sidebar-chat.visivel {
     right: 0;
 }
 
 .sidebar-chat {
-    position: fixed;
+    position: fixed; 
     top: 0;
-    right: 0;
-    height: 100%;
-    width: 260px;
-    background: white;
+    right: -260px; 
+    height: 100vh; 
+    width: 260px; 
+    background: #FFFFFF;
     padding: 20px;
-    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2);
-    transition: right 0.3s ease-in-out;
-    z-index: 10;
+    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2); 
+    transition: right 0.5s ease-in-out; 
+    z-index: 100; 
     overflow-y: auto;
-    display: block;
+    display: flex; 
+    flex-direction: column;
+    box-sizing: border-box; 
 }
 
 .sidebar-chat h2 {
     font-size: 16px;
     font-weight: 500;
-    margin-bottom: 16px; /* espaço embaixo*/
-    margin-top: 24px; /* espaço em cima  */
+    margin-bottom: 16px; 
+    margin-top: 24px; 
 }
 
 .sidebar-chat h3 {
     font-size: 16px;
     font-weight: 500;
-    margin-bottom: 12px; /* Espaço entre o título e o bloco de opções */
+    margin-bottom: 12px; 
 }
 
 .opcoes-contato {
-    margin-bottom: 24px; /* Espaço entre os contatos e a visibilidade */
+    margin-bottom: 24px; 
 }
 
 
@@ -105,20 +89,24 @@ body {
 }
 
 .overlay {
-    display: none;
-    position: fixed;
+    display: none; 
+    position: fixed; 
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 4;
-    transition: opacity 0.3s ease-in-out;
+    width: 100vw; 
+    height: 100vh; 
+    background: rgba(0, 0, 0, 0.6); 
+    z-index: 90; 
+    opacity: 0; 
+    transition: opacity 0.5s ease-in-out; 
 }
+
 
 .overlay.visivel {
     display: block;
+    opacity: 1; 
 }
+
 /* Estilização da tela de login */
 .login-container {
     text-align: center;
@@ -187,7 +175,7 @@ button.enter-button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 0 15px;
-    background-color: white;
+    background-color: #FFFFFF;
     box-shadow: none;
 }
 
@@ -223,7 +211,7 @@ button.enter-button:hover {
 }
 
 .mensagem-reservada {
-    background-color: #DCDCDC;
+    background-color: #FFDEDE;
     color: black;
     padding: 8px;
     border-radius: 5px;
@@ -320,18 +308,52 @@ button.send-button ion-icon {
     text-align: left;
 }
 
+/* Responsividade */
+.container {
+    width: 900px;
+    margin: 0 auto;
+}
+
 @media (max-width: 600px) {
-    .chat-footer {
-        flex-direction: column;
+    .container {
+        width: 100vw; 
+        padding: 10px; 
+    }
+    
+    .chat-header, .chat-footer {
+        height: 60px;
+        padding: 0 8px; 
+    }
+        .chat-header img {
+        width: 35px; 
+        height: 27px;
+        margin-right: 5px; 
     }
 
-    input.message-input {
-        height: 50px;
+   
+    .chat-header img:last-child {
+        display: block;
     }
 
-    button.send-button {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
+    
+    .chat-header img:first-child {
+        width: 60px;
+        height: auto; 
+    }
+}
+    .message-input {
+        width: 100%;
+    }
+
+
+@media (max-width: 900px) {
+    .chat-header {
+        padding: 0 10px; 
+    }
+
+    .chat-header img {
+        width: 50px; 
+        height: 38px;
+        margin-right: 8px;  
     }
 }

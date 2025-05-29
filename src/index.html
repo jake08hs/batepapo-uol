@@ -18,13 +18,13 @@
     </div>
     <div class="overlay"></div>
     <div class="login-container">
-        <h2>Entre na Sala</h2>
         <img src="img/people 1@2x.png" alt="Ícone de Usuário">
+         <h2>Entre na Sala</h2>
         <input type="text" class="username-input" placeholder="Digite seu nome">
         <button class="enter-button">Entrar</button>
     </div>
 
-    <div class="chat-container" >
+    <div class="chat-container">
         <div class="chat-wrapper">
             <header class="chat-header">
                 <img src="img/chatuol.png" alt="Ícone Bate-Papo UOL">
@@ -50,23 +50,22 @@
             <div class="opcoes-contato">
                 <div class="opcao contato selecionado" data-contato="Todos">
                     <input type="checkbox" class="checkbox-icone" id="todos" value="">
-                    <ion-icon name="people-outline"></ion-icon> Todos
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span class="nome-contato">Todos</span>
                 </div>
-                <div id="usuarios-online">
-                </div>
+                <div id="usuarios-online"></div>
             </div>
 
             <h3>Escolha a visibilidade:</h3>
             <div class="opcoes-visibilidade">
-                <div class="opcao visibilidade" data-visibilidade="publico">
-                    <input type="checkbox" class="checkbox-icone" id="publico" value="">
+                <div class="opcao visibilidade selecionado" data-visibilidade="message">
                     <ion-icon name="globe-outline"></ion-icon> Público
                 </div>
-                <div class="opcao visibilidade" data-visibilidade="reservado">
-                    <input type="checkbox" class="checkbox-icone" id="reservado" value="">
+                <div class="opcao visibilidade" data-visibilidade="private_message">
                     <ion-icon name="lock-closed-outline"></ion-icon> Reservadamente
                 </div>
             </div>
+
         </div>
     </div>
     <script type="module" src="./script.js"></script>
